@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Open UML in Draw.io</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="https://unpkg.com/pako@1.0.10/dist/pako.min.js"></script>
+<script type="text/javascript">
+    function encode64(data) {
+        r = "";
+        for (i=0; i<data.length; i+=3) {
+            if (i+2==data.length) {
+                r +=append3bytes(data.charCodeAt(i), data.charCodeAt(i+1), 0);
+            } else if (i+1==data.length) {
+                r += append3bytes(data.charCodeAt(i), 0, 0);
+            } else {
+                r += append3bytes(data.charCodeAt(i), data.charCodeAt(i+1), data.charCodeAt(i+2));
+            }
+        }
+        return r;
+    }
+
+    function append3bytes(b1, b2, b3) {
+        c1 = b1 >> 2;
+        c2 = ((b1 & 3) << 4) | (b2 >> 4);
+        c3 = ((b2 & 15) << 2) | (b3 >> 6);
+        c4 = b3 & 63;
+        r = "";
+        r += encode6bit(c1 & 63);
+        r += encode6bit(c2 & 63);
+        r += encode6bit(c3 & 63);
+        r += encode6bit(c4 & 63);
+        return r;
+    }
+
+    function encode6bit(b) {
+        if (b < 10) {
+            return String.fromCharCode(48 + b);
+        }
+        b -= 10;
+        if (b < 26) {
+            return String.fromCharCode(65 + b);
+        }
+        b -= 26;
+        if (b < 26) {
+            return String.fromCharCode(97 + b);
+        }
+        b -= 26;
+        if (b == 0) {
+            return '-';
+        }
+        if (b == 1) {
+            return '_';
+        }
+        return '?';
+    }
+
+    function compressAndEncode(text) {
+        const deflated = pako.deflate(text, { level: 9, to: 'string' });
+        return encode64(deflated);
+    }
+
+    function openInDrawio() {
+        const plantUmlData = `@startuml
+class Auto {
+  - merk: string
+  - kleur: string
+  - maxSnelheid: int
+  - huidigeSnelheid: int
+  + Auto(merk: string)
+  + Kleur: string
+  + MaxSnelheid: int
+  + HuidigeSnelheid: int
+  + ToString(): string
+}
+@enduml`;
+        const encodedData = compressAndEncode(plantUmlData);
+        const url = `https://app.diagrams.net/#U${encodedData}`;
+        window.open(url, '_blank');
+    }
+</script>
+</head>
+<body onload="openInDrawio()">
+<h1>Opening UML Diagram in Draw.io...</h1>
+<p>If the diagram does not open automatically, <a href="#" onclick="openInDrawio(); return false;">click here</a>.</p>
+</body>
+</html>

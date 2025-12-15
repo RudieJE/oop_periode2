@@ -1,0 +1,15 @@
+@startuml
+class Person {
+  - name: string
+  - birthdate: DateTime
+  - address: string
+  - telephone: string
+  - email: string
+  + Person(name: string)
+  + Birthdate: DateTime
+  + Address: string
+  + Telephone: string
+  + Email: string
+  + ToString(): string
+}
+@enduml
